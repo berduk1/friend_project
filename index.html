@@ -1,18 +1,65 @@
 <!DOCTYPE html>
 <html>
     <head>
-
+        <title>Linijski Chart s Highcharts</title>
+        <script src="https://code.highcharts.com/highcharts.js"></script>
     </head>
+    <style>
+
+.text{
+
+ display: flex;
+ justify-content: center;
+ align-items: center;
+ height: 800px;
+ 
+}
+    
+    </style>
     <body>
         <form>
-            <label for="cars">Choose a stock market index:</label>
+        <div class="text"> 
+            <label for="cars" class="car">Choose a stock market index:</label>
              <select id="cars" name="cars">
                  <option value="volvo">S&P 500</option>
                  <option value="saab">Dow Jones</option>
                 <option value="fiat">Nasdaq</option>
+                <br></br>
             </select>
             <label for="fname">Current price:</label>
             <input type="text" id="fname" name="fname">
+            
+        </div>
         </form>
+        <div id="container" style="width:100%; height:400px;"></div>
+        <script src="app.js"></script>
+        <h1>Broj korisnika po mjesecima</h1>
+    <div id="container" style="width: 600px; height: 400px;"></div>
+
+    <!-- Tvoj JavaScript kod -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            Highcharts.chart('container', {
+                chart: {
+                    type: 'line'
+                },
+                title: {
+                    text: 'Broj korisnika po mjesecima'
+                },
+                xAxis: {
+                    categories: ['Siječanj', 'Veljača', 'Ožujak', 'Travanj', 'Svibanj', 'Lipanj']
+                },
+                yAxis: {
+                    title: {
+                        text: 'Broj korisnika'
+                    }
+                },
+                series: [{
+                    name: 'Korisnici',
+                    data: [29, 71, 106, 129, 144, 176]
+                }]
+            });
+        });
+    </script>
     </body>
 </html>

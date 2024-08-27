@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "express": "^4.19.2",
+    "highcharts": "^11.4.7",
+    "highcharts-export-server": "^4.0.2",
+    "jsdom": "^25.0.0",
+    "puppeteer": "^23.2.0"
+  }
+}
