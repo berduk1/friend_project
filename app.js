@@ -1,31 +1,90 @@
-var http = require('http');
-var fs = require('fs');
+// Unesi tvoj API ključ ovdje
+const API_KEY = 'ZN5OM013PS0PMZEX';
 
-var server = http.createServer(function(req, res){
-    console.log('request was made: ' + req.url);
-    res.writeHead(200, {'Content-Type': 'text/html'});
-    var myReadStream = fs.createReadStream(__dirname + '/index.html',  'utf8');
-    myReadStream.pipe(res);
-});
+// Funkcija koja dohvaća podatke
+async function dohvatiPodatke() {
+    const firma = document.getElementById('firma').value;
+    let simbol = '';
 
-server.listen(3000, '127.0.0.1');
-console.log('listening to port 3000');
+    // Postavljanje simbola ovisno o odabiru
+    switch (firma) {
+        case 'SP500':
+            simbol = '^GSPC'; // Simbol za S&P 500
+            break;
+        case 'AAPL':
+            simbol = 'AAPL'; // Apple Inc.
+            break;
+        case 'GOOGL':
+            simbol = 'GOOGL'; // Alphabet Inc.
+            break;
+    }
 
-const express = require('express');
-const path = require('path');
+    // API URL za dohvaćanje podataka
+    const url = `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${simbol}&apikey=${API_KEY}`;
 
-const app = express();
-const PORT = 3000;
+    try {
+        const response = await fetch(url);
+        const data = await response.json();
 
-// Posluži statičke datoteke (npr. HTML)
-app.use(express.static(path.join(__dirname)));
+        // Dohvaćanje serije cijena
+        const dnevniPodaci = data['Time Series (Daily)'];
+        const datumi = [];
+        const cijene = [];
 
-// Postavi rutu za početnu stranicu
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
-});
+        for (let datum in dnevniPodaci) {
+            datumi.push(datum);
+            cijene.push(parseFloat(dnevniPodaci[datum]['4. close']));
+        }
 
-// Pokreni server
-app.listen(PORT, () => {
-    console.log(`Server je pokrenut na http://localhost:${PORT}`);
-});
+        // Obrnuti redoslijed da bi najnoviji podaci bili zadnji
+        datumi.reverse();
+        cijene.reverse();
+
+        // Prikaz na grafu
+        prikaziGraf(datumi, cijene);
+
+        // Prikaz zadnje cijene
+        const zadnjiDatum = datumi[datumi.length - 1];
+        const zadnjaCijena = cijene[cijene.length - 1];
+        document.getElementById('detalji').innerHTML = `Datum: ${zadnjiDatum}, Cijena: $${zadnjaCijena}`;
+
+    } catch (error) {
+        console.error('Greška pri dohvaćanju podataka:', error);
+        alert('Nešto je pošlo po krivu prilikom dohvaćanja podataka!');
+    }
+}
+
+// Funkcija za prikazivanje grafa pomoću Chart.js
+function prikaziGraf(datumi, cijene) {
+    const ctx = document.getElementById('graf').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: datumi,
+            datasets: [{
+                label: 'Cijena',
+                data: cijene,
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 2,
+                fill: false,
+            }]
+        },
+        options: {
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Datum'
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Cijena u USD'
+                    },
+                    beginAtZero: false
+                }
+            }
+        }
+    });
+}

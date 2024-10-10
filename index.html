@@ -1,120 +1,30 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <title>Linijski Chart s Highcharts</title>
-        <script src="https://code.highcharts.com/highcharts.js"></script>
-    </head>
-    <style>
+<html lang="hr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Financijski Podaci - S&P 500</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>Financijski Podaci</h1>
 
-.text{
+    <label for="firma">Odaberite firmu:</label>
+    <select id="firma">
+        <option value="SP500">S&P 500</option>
+        <option value="AAPL">Apple Inc.</option>
+        <option value="GOOGL">Alphabet Inc.</option>
+    </select>
 
- display: flex;
- justify-content: center;
- align-items: center;
- height: 800px;
- 
-}
-    
-    </style>
-    <body>
-        <form>
-        <div class="text"> 
-            <label for="cars" class="car">Choose a stock market index:</label>
-             <select id="cars" name="cars">
-                 <option value="volvo">S&P 500</option>
-                 <option value="saab">Dow Jones</option>
-                <option value="fiat">Nasdaq</option>
-                <br></br>
-            </select>
-            <label for="fname">Current price:</label>
-            <input type="text" id="fname" name="fname">
-            
-        </div>
-        </form>
-        <div id="container" style="width:100%; height:400px;"></div>
-        <script src="app.js"></script>
-        <h1>Broj korisnika po mjesecima</h1>
-        <div id="podaci"></div>
-    <div id="container" style="width: 600px; height: 400px;"></div>
+    <button onclick="dohvatiPodatke()">Dohvati podatke</button>
 
-    <!-- Tvoj JavaScript kod -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            Highcharts.chart('container', {
-                chart: {
-                    type: 'line'
-                },
-                title: {
-                    text: 'Broj korisnika po mjesecima'
-                },
-                xAxis: {
-                    categories: ['Siječanj', 'Veljača', 'Ožujak', 'Travanj', 'Svibanj', 'Lipanj']
-                },
-                yAxis: {
-                    title: {
-                        text: 'Broj korisnika'
-                    }
-                },
-                series: [{
-                    name: 'Korisnici',
-                    data: [29, 71, 106, 129, 144, 176]
-                }]
-            });
-        });
-    </script>
+    <div>
+        <h2>Dnevne Cijene:</h2>
+        <p id="detalji"></p>
+    </div>
 
-    <h1>S&P 500 Data from Alpha Vantage</h1>
-    <button id="fetchData">Fetch Data</button>
-    <div id="data"></div>
-<script>
-document.getElementById("fetchData").addEventListener("click", function() {
-    // Tvoj API ključ
-    const apiKey = 'ZN5OM013PS0PMZEX';
-    
-    // URL za preuzimanje podataka o S&P 500
-    const url = `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=SPY&apikey=${apiKey}`;
+    <canvas id="graf" width="400" height="200"></canvas>
 
-    // Slanje zahtjeva koristeći Fetch API
-    fetch(url)
-        .then(response => response.json())
-        .then(data => {
-            // Podaci su preuzeti, možemo ih prikazati
-            displayData(data);
-        })
-        .catch(error => console.error('Error fetching data:', error));
-});
-
-// Funkcija za prikaz podataka u tabeli
-function displayData(data) {
-    const timeSeries = data["Time Series (Daily)"];
-    const table = document.createElement('table');
-    const headerRow = table.insertRow();
-
-    // Kreiraj zaglavlje tabele
-    headerRow.insertCell(0).innerHTML = "Date";
-    headerRow.insertCell(1).innerHTML = "Open";
-    headerRow.insertCell(2).innerHTML = "High";
-    headerRow.insertCell(3).innerHTML = "Low";
-    headerRow.insertCell(4).innerHTML = "Close";
-    headerRow.insertCell(5).innerHTML = "Volume";
-
-    // Dodaj redove sa podacima
-    for (let date in timeSeries) {
-        let row = table.insertRow();
-        row.insertCell(0).innerHTML = date;
-        row.insertCell(1).innerHTML = timeSeries[date]["1. open"];
-        row.insertCell(2).innerHTML = timeSeries[date]["2. high"];
-        row.insertCell(3).innerHTML = timeSeries[date]["3. low"];
-        row.insertCell(4).innerHTML = timeSeries[date]["4. close"];
-        row.insertCell(5).innerHTML = timeSeries[date]["5. volume"];
-    }
-
-    // Prikaz podataka u div elementu
-    const dataDiv = document.getElementById('data');
-    dataDiv.innerHTML = ''; // Očisti prethodne podatke
-    dataDiv.appendChild(table);
-}
-</script>
-
-    </body>
+    <script src="skripta.js"></script>
+</body>
 </html>
