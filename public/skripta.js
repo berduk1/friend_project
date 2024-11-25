@@ -30,8 +30,8 @@ async function dohvatiPodatke() {
     prikaziGraf(datumi, cijene);
 
     // Prikaz zadnje cijene
-    const zadnjiDatum = datumi[datumi.length - 1];
-    const zadnjaCijena = cijene[cijene.length - 1];
+    const zadnjiDatum = datumi[datumi.length];
+    const zadnjaCijena = cijene[cijene.length];
     document.getElementById('detalji').innerHTML = `Datum: ${zadnjiDatum}, Cijena: $${zadnjaCijena}`;
 }
 

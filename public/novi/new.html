@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>S&P 500 Graf (Intraday)</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/highcharts"></script>
+    <style>
+        #container {
+            max-width: 800px;
+            margin: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Intraday fluktuacija cijena S&P 500</h1>
+    <div id="container" style="width: 150%; height: 400px;"></div>
+
+    <script>
+        // Funkcija za dobivanje današnjeg datuma s lokalnim vremenom
+        function getLocalDateString() {
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset()); // Podešavanje vremenske zone
+            return now.toISOString().split('T')[0];
+        }
+
+        async function fetchData() {
+            try {
+                const response = await axios.get('https://www.alphavantage.co/query', {
+                    params: {
+                        function: 'TIME_SERIES_INTRADAY',
+                        symbol: 'SPY',
+                        interval: '5min',
+                        apikey: 'YOUR_API_KEY' // Zamijeni s tvojim API ključem
+                    }
+                });
+
+                const data = response.data['Time Series (5min)'];
+                const today = getLocalDateString(); // Koristimo lokalni datum
+                const categories = [];
+                const prices = [];
+
+                // Povuci podatke i cijene za današnji dan
+                Object.keys(data).forEach(timestamp => {
+                    if (timestamp.startsWith(today)) {
+                        const time = timestamp.split(' ')[1];
+                        categories.push(time); // Samo vrijeme (HH:mm)
+                        prices.push(parseFloat(data[timestamp]['4. close']) * 10); // Množi cijenu s 10
+                    }
+                });
+
+                // Ako nema današnjih podataka, koristi zadnji dostupni dan
+                if (categories.length === 0 || prices.length === 0) {
+                    const latestDay = Object.keys(data)[0].split(' ')[0];
+                    categories.length = 0;
+                    prices.length = 0;
+
+                    Object.keys(data).forEach(timestamp => {
+                        if (timestamp.startsWith(latestDay)) {
+                            const time = timestamp.split(' ')[1];
+                            categories.push(time);
+                            prices.push(parseFloat(data[timestamp]['4. close']) * 10); // Množi cijenu s 10
+                        }
+                    });
+                }
+
+                if (categories.length === 0 || prices.length === 0) {
+                    console.error('Nema dostupnih podataka.');
+                    return;
+                }
+
+                createChart(categories.reverse(), prices.reverse());
+            } catch (error) {
+                console.error("Greška prilikom povlačenja podataka:", error);
+            }
+        }
+
+        function createChart(categories, prices) {
+            Highcharts.chart('container', {
+                chart: {
+                    type: 'line'
+                },
+                title: {
+                    text: 'Fluktuacija cijena S&P 500 (5-minutni intervali)'
+                },
+                xAxis: {
+                    categories: categories,
+                    title: {
+                        text: 'Vrijeme'
+                    },
+                    tickInterval: Math.floor(categories.length / 10),  // Prikaži svakih 30 minuta do 1 sat
+                    labels: {
+                        rotation: -45, // Rotiraj oznake ako ih je previše
+                        formatter: function () {
+                            // Prikaži samo važne vremenske točke (npr. svakih 30 min)
+                            const [hour, minute] = this.value.split(':');
+                            if (minute === '00' || minute === '30') {
+                                return `${hour}:${minute}`;
+                            }
+                            return '';
+                        }
+                    }
+                },
+                yAxis: {
+                    title: {
+                        text: 'Cijena (tisuće)'
+                    }
+                },
+                series: [{
+                    name: 'Cijena',
+                    data: prices
+                }]
+            });
+        }
+
+        fetchData();
+        setInterval(fetchData, 300000); // Osvježavaj svakih 5 minuta
+    </script>
+</body>
+</html>
