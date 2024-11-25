@@ -1,32 +1,28 @@
+const express = require('express');
+const axios = require('axios');
+const path = require('path');
+const app = express();
+const port = 3000;
+
+// Postavljanje statičkih datoteka (HTML, CSS, JS) iz mape 'public'
+app.use(express.static(path.join(__dirname, 'public')));
+
 // Unesi tvoj API ključ ovdje
 const API_KEY = 'ZN5OM013PS0PMZEX';
 
-// Funkcija koja dohvaća podatke
-async function dohvatiPodatke() {
-    const firma = document.getElementById('firma').value;
-    let simbol = '';
-
-    // Postavljanje simbola ovisno o odabiru
-    switch (firma) {
-        case 'SP500':
-            simbol = '^GSPC'; // Simbol za S&P 500
-            break;
-        case 'AAPL':
-            simbol = 'AAPL'; // Apple Inc.
-            break;
-        case 'GOOGL':
-            simbol = 'GOOGL'; // Alphabet Inc.
-            break;
-    }
-
-    // API URL za dohvaćanje podataka
-    const url = `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${simbol}&apikey=${API_KEY}`;
+// API ruta za dohvaćanje podataka iz Alpha Vantage
+app.get('/api/finance/:symbol', async (req, res) => {
+    const symbol = req.params.symbol;
+    const url = `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${symbol}&apikey=${API_KEY}`;
 
     try {
-        const response = await fetch(url);
-        const data = await response.json();
+        const response = await axios.get(url);
+        const data = response.data;
 
-        // Dohvaćanje serije cijena
+        if (data['Error Message']) {
+            return res.status(400).json({ error: 'Neispravan simbol.' });
+        }
+
         const dnevniPodaci = data['Time Series (Daily)'];
         const datumi = [];
         const cijene = [];
@@ -36,55 +32,19 @@ async function dohvatiPodatke() {
             cijene.push(parseFloat(dnevniPodaci[datum]['4. close']));
         }
 
-        // Obrnuti redoslijed da bi najnoviji podaci bili zadnji
-        datumi.reverse();
-        cijene.reverse();
-
-        // Prikaz na grafu
-        prikaziGraf(datumi, cijene);
-
-        // Prikaz zadnje cijene
-        const zadnjiDatum = datumi[datumi.length - 1];
-        const zadnjaCijena = cijene[cijene.length - 1];
-        document.getElementById('detalji').innerHTML = `Datum: ${zadnjiDatum}, Cijena: $${zadnjaCijena}`;
-
+        res.json({
+            datumi: datumi.reverse(),
+            cijene: cijene.reverse(),
+        });
     } catch (error) {
-        console.error('Greška pri dohvaćanju podataka:', error);
-        alert('Nešto je pošlo po krivu prilikom dohvaćanja podataka!');
+        res.status(500).json({ error: 'Greška pri dohvaćanju podataka.' });
     }
-}
+});
 
-// Funkcija za prikazivanje grafa pomoću Chart.js
-function prikaziGraf(datumi, cijene) {
-    const ctx = document.getElementById('graf').getContext('2d');
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: datumi,
-            datasets: [{
-                label: 'Cijena',
-                data: cijene,
-                borderColor: 'rgba(75, 192, 192, 1)',
-                borderWidth: 2,
-                fill: false,
-            }]
-        },
-        options: {
-            scales: {
-                x: {
-                    title: {
-                        display: true,
-                        text: 'Datum'
-                    }
-                },
-                y: {
-                    title: {
-                        display: true,
-                        text: 'Cijena u USD'
-                    },
-                    beginAtZero: false
-                }
-            }
-        }
-    });
-}
+app.listen(port, () => {
+    console.log(`Server radi na http://localhost:${port}`);
+});
+app.get('/api/finance/:symbol', async (req, res) => {
+    console.log(`Primljen zahtjev za simbol: ${req.params.symbol}`);
+    // Ostatak koda...
+});
