@@ -3,28 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Financijski Podaci - S&P 500</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>Graf cijene indeksa</title>
+    <!-- Učitavanje Highcharts biblioteke -->
+    <script src="https://code.highcharts.com/highcharts.js"></script>
 </head>
 <body>
-    <h1>Financijski Podaci</h1>
+    <h1>Graf cijene burzovnih indeksa</h1>
 
-    <label for="firma">Odaberite firmu:</label>
-    <select id="firma">
-        <option value="SP500">S&P 500</option>
-        <option value="AAPL">Apple Inc.</option>
-        <option value="GOOGL">Alphabet Inc.</option>
+    <!-- Izbornik za odabir indeksa -->
+    <label for="indexSelect">Odaberi indeks:</label>
+    <select id="indexSelect">
+        <option value="SPY">S&P 500 (ETF)</option>
+        <option value="DIA">Dow Jones (ETF)</option>
+        <option value="QQQ">Nasdaq 100 (ETF)</option>
     </select>
+    <button onclick="fetchData()">Povuci podatke</button>
+    <p id="status">Status: Čeka se...</p>
 
-    <button onclick="dohvatiPodatke()">Dohvati podatke</button>
+    <!-- Div za prikaz grafa -->
+    <div id="container" style="width: 80%; height: 400px; margin: auto;"></div>
 
-    <div>
-        <h2>Dnevne Cijene:</h2>
-        <p id="detalji"></p>
-    </div>
-
-    <canvas id="graf" width="400" height="200"></canvas>
-
-    <script src="skripta.js"></script>
+    <!-- JavaScript za dohvat podataka -->
+    <script src="script.js"></script>
 </body>
 </html>
